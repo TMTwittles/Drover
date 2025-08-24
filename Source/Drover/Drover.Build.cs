@@ -24,20 +24,20 @@ public class Drover : ModuleRules
 		PrivateDependencyModuleNames.AddRange(new string[] { });
 
 		PublicIncludePaths.AddRange(new string[] {
-			"Drover",
-			"Drover/Variant_Platforming",
-			"Drover/Variant_Platforming/Animation",
-			"Drover/Variant_Combat",
-			"Drover/Variant_Combat/AI",
-			"Drover/Variant_Combat/Animation",
-			"Drover/Variant_Combat/Gameplay",
-			"Drover/Variant_Combat/Interfaces",
-			"Drover/Variant_Combat/UI",
-			"Drover/Variant_SideScrolling",
-			"Drover/Variant_SideScrolling/AI",
-			"Drover/Variant_SideScrolling/Gameplay",
-			"Drover/Variant_SideScrolling/Interfaces",
-			"Drover/Variant_SideScrolling/UI"
+			"Drover"
+			//"Drover/Variant_Platforming",
+			//"Drover/Variant_Platforming/Animation",
+			//"Drover/Variant_Combat",
+			//"Drover/Variant_Combat/AI",
+			//"Drover/Variant_Combat/Animation",
+			//"Drover/Variant_Combat/Gameplay",
+			//"Drover/Variant_Combat/Interfaces",
+			//"Drover/Variant_Combat/UI",
+			//"Drover/Variant_SideScrolling",
+			//"Drover/Variant_SideScrolling/AI",
+			//"Drover/Variant_SideScrolling/Gameplay",
+			//"Drover/Variant_SideScrolling/Interfaces",
+			//"Drover/Variant_SideScrolling/UI"
 		});
 
 		// Uncomment if you are using Slate UI
