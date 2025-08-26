@@ -11,12 +11,21 @@
 			"AdditionalDependencies": [
 				"Engine",
 				"AIModule",
-				"UMG"
+				"UMG",
+				"AnimGraph"
 			]
 		},
 		{
 			"Name": "DroverAnimation",
 			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine"
+			]
+		},
+		{
+			"Name": "DroverAnimationEditor",
+			"Type": "Editor",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
 				"Engine"

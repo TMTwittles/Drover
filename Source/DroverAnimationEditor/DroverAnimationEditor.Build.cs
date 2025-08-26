@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class DroverAnimation : ModuleRules
+public class DroverAnimationEditor : ModuleRules
 {
-	public DroverAnimation(ReadOnlyTargetRules Target) : base(Target)
+	public DroverAnimationEditor(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -12,7 +12,10 @@ public class DroverAnimation : ModuleRules
 			"Core",
 			"CoreUObject",
 			"Engine",
-			"AnimGraphRuntime"
-		});
+			"AnimGraph",
+            "UnrealEd",
+			"BlueprintGraph",
+			"DroverAnimation"
+        });
 	}
 }
