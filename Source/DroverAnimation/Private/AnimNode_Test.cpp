@@ -9,6 +9,9 @@ FAnimNode_Test::FAnimNode_Test()
 void FAnimNode_Test::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
 	BasePose.Initialize(Context);
+
+	// Get poses from anim sequences.
+
 }
 
 void FAnimNode_Test::Evaluate_AnyThread(FPoseContext& Output)
@@ -21,4 +24,14 @@ void FAnimNode_Test::Evaluate_AnyThread(FPoseContext& Output)
 		FAnimationPoseData PoseData(Output);
 		Sequence->GetAnimationPose(PoseData, ExtractContext);
 	}
+}
+
+void FAnimNode_Test::ExtractAnimPose(double InSequenceTime, FCompactPose& OutExtractedPose)
+{
+	FAnimExtractContext ExtractContext(0.0);
+	FBlendedCurve Curve; // TODO: Find out what this does.
+	UE::Anim::FStackAttributeContainer AnimAttributes; // TODO: Find out what this does.
+
+	FAnimationPoseData PoseData(OutExtractedPose, Curve, AnimAttributes);
+	Sequence->GetAnimationPose(PoseData, ExtractContext);
 }
