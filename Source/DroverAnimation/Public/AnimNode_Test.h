@@ -9,8 +9,7 @@
  * 
  */
 USTRUCT()
-struct DROVERANIMATION_API FTestAnimNode : public FAnimNode_Base
+struct DROVERANIMATION_API FAnimNode_Test : public FAnimNode_Base
 {
 	GENERATED_USTRUCT_BODY()
-	
 };
