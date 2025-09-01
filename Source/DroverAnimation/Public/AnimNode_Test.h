@@ -23,10 +23,13 @@ struct DROVERANIMATION_API FAnimNode_Test : public FAnimNode_Base
 	float TimeBetweenFrames;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float ElapsedTime;
+	float DeltaTime;
 
 	FCompactPose StartPose;
 	FCompactPose EndPose;
+	int32 TargetFrame;
+	float ElapsedTime;
+	bool bExtractedPoses = false;
 
 	FAnimNode_Test();
 	
