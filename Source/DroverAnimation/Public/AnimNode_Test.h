@@ -16,17 +16,15 @@ struct DROVERANIMATION_API FAnimNode_Test : public FAnimNode_Base
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FPoseLink BasePose;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (PinShownByDefault))
 	UAnimSequence* Sequence;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float TimeBetweenFrames;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float DeltaTime;
-
 	FCompactPose StartPose;
 	FCompactPose EndPose;
+	FCompactPose CurrentPose;
 	int32 TargetFrame;
 	float ElapsedTime;
 	bool bExtractedPoses = false;
@@ -34,6 +32,7 @@ struct DROVERANIMATION_API FAnimNode_Test : public FAnimNode_Base
 	FAnimNode_Test();
 	
 	virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context) override;
+	virtual void Update_AnyThread(const FAnimationUpdateContext& Context) override;
 	virtual void Evaluate_AnyThread(FPoseContext& Output) override;
-	void ExtractAnimPose(double InSequenceTime, FCompactPose& OutExtractedPose);
+	void ExtractAnimPose(const double InSequenceTime, FCompactPose& OutExtractedPose);
 };
