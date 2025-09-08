@@ -19,10 +19,4 @@ public:
 	void BindAnimationSequence(const UAnimSequence* InAnimSequence);
 	void GetAnimationPose(FAnimationPoseData& OutAnimationPoseData, const FAnimExtractContext& ExtractionContext) const;
 	void GetBonePose(struct FAnimationPoseData& OutAnimationPoseData, const FAnimExtractContext& ExtractionContext, bool bForceUseRawData = false) const;
-
-	FORCEINLINE USkeleton* GetSkeleton() const { return Skeleton; }
-
-private:
-	UPROPERTY()
-	USkeleton* Skeleton;
 };

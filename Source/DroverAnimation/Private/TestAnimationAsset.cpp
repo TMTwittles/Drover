@@ -4,6 +4,7 @@
 #include "TestAnimationAsset.h"
 #include "Animation/AnimData/IAnimationDataModel.h"
 #include "BonePose.h"
+#include "AnimEncoding.h"
 
 void UTestAnimationAsset::BindAnimationSequence(const UAnimSequence* InAnimSequence)
 {
@@ -15,7 +16,6 @@ void UTestAnimationAsset::BindAnimationSequence(const UAnimSequence* InAnimSeque
 void UTestAnimationAsset::GetAnimationPose(FAnimationPoseData& OutAnimationPoseData, const FAnimExtractContext& ExtractionContext) const
 {
 	FCompactPose& OutPose = OutAnimationPoseData.GetPose();
-	FBoneContainer& RequiredBones = OutPose.GetBoneContainer();
 	const USkeleton* TargetSkeleton = GetSkeleton();
 
 	if (!TargetSkeleton)
@@ -46,6 +46,41 @@ void UTestAnimationAsset::GetAnimationPose(FAnimationPoseData& OutAnimationPoseD
 	{
 		bShouldInterpolate = false;
 		KeyIndex1 = KeyIndex2;
+	}
+
+	// TODO: Add support for reading curves. 
+	const TArray<FBoneAnimationTrack> BoneAnimationTracks; // TODO: Extract this during bind anim sequnce.
+
+	const int32 NumAnimationTracks = BoneAnimationTracks.Num();
+	const FBoneContainer& RequiredBones = OutPose.GetBoneContainer();
+
+	// TODO: Add support for reading virtual bones?
+
+	FCompactPose Key2Pose;
+	Key2Pose.CopyBonesFrom(OutPose);
+
+	for (const FBoneAnimationTrack& AnimationTrack : BoneAnimationTracks)
+	{
+		// Access animation track respective skeleton bone.
+		const int32 SkeletonBoneIndex = AnimationTrack.BoneTreeIndex;
+
+		if (SkeletonBoneIndex == INDEX_NONE && SkeletonBoneIndex > MAX_BONES)
+		{
+			// TODO: Add warnings / error logging here. 
+			continue;
+		}
+
+		// TODO: This method is deprecated, should use GetCompactPoseIndexFromSkeletonPoseIndex instead.
+		const FCompactPoseBoneIndex PoseBoneIndex = RequiredBones.GetCompactPoseIndexFromSkeletonIndex(SkeletonBoneIndex);
+
+		if (PoseBoneIndex == INDEX_NONE)
+		{
+			// TODO: Add warning / error logging here.
+			continue;
+		}
+
+		// Extract raw animation data.
+		const FRawAnimSequenceTrack& TrackToExtract = AnimationTrack.InternalTrackData;
 	}
 }
 
