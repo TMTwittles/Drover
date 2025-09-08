@@ -9,6 +9,12 @@ FAnimNode_Test::FAnimNode_Test()
 void FAnimNode_Test::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
 	BasePose.Initialize(Context);
+
+	TestAnimationAsset = NewObject<UTestAnimationAsset>();
+	if (Sequence)
+	{
+		TestAnimationAsset->BindAnimationSequence(Sequence);
+	}
 }
 
 void FAnimNode_Test::Update_AnyThread(const FAnimationUpdateContext& Context)

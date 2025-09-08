@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Animation/AnimNodeBase.h"
+#include "TestAnimationAsset.h"
 #include "AnimNode_Test.generated.h"
 
 /**
@@ -21,6 +22,9 @@ struct DROVERANIMATION_API FAnimNode_Test : public FAnimNode_Base
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float TimeBetweenFrames;
+
+	UPROPERTY()
+	TObjectPtr<UTestAnimationAsset> TestAnimationAsset;
 
 	FCompactPose StartPose;
 	FCompactPose EndPose;
