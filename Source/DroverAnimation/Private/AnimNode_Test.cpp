@@ -22,13 +22,22 @@ void FAnimNode_Test::Update_AnyThread(const FAnimationUpdateContext& Context)
 	BasePose.Update(Context);
 
 	ElapsedTime += Context.GetDeltaTime();
+	InternalTimeAccumulator += Context.GetDeltaTime();
+	if (InternalTimeAccumulator >= 10.0f)
+	{
+		InternalTimeAccumulator = 0.0f;
+	}
 }
 
 void FAnimNode_Test::Evaluate_AnyThread(FPoseContext& Output)
 {
 	BasePose.Evaluate(Output);
+	
+	FAnimExtractContext ExtractContext(InternalTimeAccumulator);
+	FAnimationPoseData PoseData(Output);
+	TestAnimationAsset->GetAnimationPose(PoseData, ExtractContext);
 
-	FAnimExtractContext ExtractContext(TargetFrame == 0 ? 0.0 : 1.0);
+	/*FAnimExtractContext ExtractContext(TargetFrame == 0 ? 0.0 : 1.0);
 	FAnimationPoseData PoseData(Output);
 	Sequence->GetAnimationPose(PoseData, ExtractContext);
 	ElapsedTime += 1.0f;
@@ -37,7 +46,7 @@ void FAnimNode_Test::Evaluate_AnyThread(FPoseContext& Output)
 	{
 		ElapsedTime = 0.0f;
 		TargetFrame = TargetFrame == 0 ? 1 : 0;
-	}
+	}*/
 }
 
 void FAnimNode_Test::ExtractAnimPose(const double InSequenceTime, FCompactPose& OutExtractedPose)

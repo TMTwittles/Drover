@@ -31,6 +31,7 @@ struct DROVERANIMATION_API FAnimNode_Test : public FAnimNode_Base
 	FCompactPose CurrentPose;
 	int32 TargetFrame;
 	float ElapsedTime;
+	float InternalTimeAccumulator;
 	bool bExtractedPoses = false;
 
 	FAnimNode_Test();

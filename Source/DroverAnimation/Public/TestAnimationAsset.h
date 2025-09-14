@@ -18,5 +18,10 @@ class DROVERANIMATION_API UTestAnimationAsset : public UAnimationAsset
 public:
 	void BindAnimationSequence(const UAnimSequence* InAnimSequence);
 	void GetAnimationPose(FAnimationPoseData& OutAnimationPoseData, const FAnimExtractContext& ExtractionContext) const;
-	void GetBonePose(struct FAnimationPoseData& OutAnimationPoseData, const FAnimExtractContext& ExtractionContext, bool bForceUseRawData = false) const;
+private:
+	FTransform ExtractTransformFromKeyIndex(const int32 InKeyIndex, const FRawAnimSequenceTrack& InTrackToExtract) const;
+
+	FName RetargetSourceName;
+	TArray<FTransform> RetargetTransforms;
+	TScriptInterface<IAnimationDataModel> AnimDataModelInterface;
 };
