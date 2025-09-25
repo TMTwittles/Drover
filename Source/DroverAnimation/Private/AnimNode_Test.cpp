@@ -1,66 +1,84 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AnimNode_Test.h"
+#include "Animation/AnimInstanceProxy.h"
 
 FAnimNode_Test::FAnimNode_Test()
 {
+
 }
 
 void FAnimNode_Test::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
 	BasePose.Initialize(Context);
 
-	TestAnimationAsset = NewObject<UTestAnimationAsset>();
-	if (Sequence)
-	{
-		TestAnimationAsset->BindAnimationSequence(Sequence);
-	}
+	bValidPoses = IsValidPoses();
+
+	if (!bValidPoses) { return; }
+
+	CurrPoseIndex = 0;
+	TargetPoseIndex = CurrPoseIndex + 1;
 }
 
 void FAnimNode_Test::Update_AnyThread(const FAnimationUpdateContext& Context)
 {
 	BasePose.Update(Context);
 
-	ElapsedTime += Context.GetDeltaTime();
+	if (!bValidPoses) { return; }
+	
+	// Update internal time accumulator.
 	InternalTimeAccumulator += Context.GetDeltaTime();
-	if (InternalTimeAccumulator >= 10.0f)
+
+	const float InverseVelocityNormalized = 1.0f - VelocityNormalized;
+	TargetStrideLength = FMath::Clamp(InverseVelocityNormalized * MinStrideLength, MinStrideLength, MaxStrideLength);
+	UE_LOG(LogTemp, Log, TEXT("Inverse velocity norm: %f, target stride length: %f"), InverseVelocityNormalized, TargetStrideLength);
+	if (InternalTimeAccumulator >= TargetStrideLength)
 	{
 		InternalTimeAccumulator = 0.0f;
+		CurrPoseIndex = TargetPoseIndex;
+		const bool bLoopPoseIndex = TargetPoseIndex == PoseIndexes.Num() - 1;
+		TargetPoseIndex = bLoopPoseIndex ? 0 : TargetPoseIndex + 1;
 	}
 }
 
 void FAnimNode_Test::Evaluate_AnyThread(FPoseContext& Output)
 {
-	BasePose.Evaluate(Output);
-	
-	FAnimExtractContext ExtractContext(InternalTimeAccumulator);
-	FAnimationPoseData PoseData(Output);
-	TestAnimationAsset->GetAnimationPose(PoseData, ExtractContext);
+	FPoseContext BaseContext(Output);
 
-	/*FAnimExtractContext ExtractContext(TargetFrame == 0 ? 0.0 : 1.0);
-	FAnimationPoseData PoseData(Output);
-	Sequence->GetAnimationPose(PoseData, ExtractContext);
-	ElapsedTime += 1.0f;
-
-	if (ElapsedTime > TimeBetweenFrames)
+	if (!bValidPoses)
 	{
-		ElapsedTime = 0.0f;
-		TargetFrame = TargetFrame == 0 ? 1 : 0;
-	}*/
-}
-
-void FAnimNode_Test::ExtractAnimPose(const double InSequenceTime, FCompactPose& OutExtractedPose)
-{
-	if (!Sequence)
-	{
-		// TODO: Add warnings.
+		//Output = BaseContext;
 		return;
 	}
 
-	FAnimExtractContext ExtractContext(InSequenceTime);
-	FBlendedCurve Curve = FBlendedCurve(); // TODO: Find out what this does.
-	UE::Anim::FStackAttributeContainer AnimAttributes = UE::Anim::FStackAttributeContainer(); // TODO: Find out what this does.
+	BasePose.Evaluate(Output);
 
-	FAnimationPoseData PoseData(OutExtractedPose, Curve, AnimAttributes);
-	Sequence->GetAnimationPose(PoseData, ExtractContext);
+	FPoseContext ToPose(BaseContext);
+	FPoseContext FromPose(BaseContext);
+	FAnimationPoseData ToPoseData(ToPose);
+	FAnimationPoseData FromPoseData(FromPose);
+	ExtractPoses(ToPoseData, FromPoseData);
+
+	const float Alpha = InternalTimeAccumulator / TargetStrideLength;
+	
+	FAnimationPoseData OutputPoseData(Output);
+
+	FAnimationRuntime::BlendTwoPosesTogether(ToPoseData, FromPoseData, Alpha, OutputPoseData);
+
+	Output.Pose = OutputPoseData.GetPose();
+}
+
+void FAnimNode_Test::ExtractPoses(FAnimationPoseData& OutData01, FAnimationPoseData& OutData02)
+{
+	FAnimExtractContext ExtractContext;
+	FPoseCurve PoseCurve;
+	ExtractContext.PoseCurves.Add(PoseCurve);
+	
+	ExtractContext.PoseCurves[0].PoseIndex = PoseIndexes[CurrPoseIndex];
+	ExtractContext.PoseCurves[0].Value = 1.0;
+	PoseAsset->GetAnimationPose(OutData01, ExtractContext);
+	
+	ExtractContext.PoseCurves[0].PoseIndex = PoseIndexes[TargetPoseIndex];
+	ExtractContext.PoseCurves[0].Value = 1.0;
+	PoseAsset->GetAnimationPose(OutData02, ExtractContext);
 }

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Animation/AnimNodeBase.h"
+#include "Animation/PoseAsset.h"
 #include "TestAnimationAsset.h"
 #include "AnimNode_Test.generated.h"
 
@@ -15,23 +16,28 @@ struct DROVERANIMATION_API FAnimNode_Test : public FAnimNode_Base
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FPoseLink BasePose;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (PinShownByDefault))
-	UAnimSequence* Sequence;
+	TArray<int32> PoseIndexes;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float TimeBetweenFrames;
+	UPoseAsset* PoseAsset;
 
-	UPROPERTY()
-	TObjectPtr<UTestAnimationAsset> TestAnimationAsset;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FPoseLink BasePose;
 
-	FCompactPose StartPose;
-	FCompactPose EndPose;
-	FCompactPose CurrentPose;
-	int32 TargetFrame;
-	float ElapsedTime;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MaxStrideLength;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MinStrideLength;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (PinShownByDefault))
+	float VelocityNormalized;
+
+	bool bValidPoses;
+	int32 CurrPoseIndex;
+	int32 TargetPoseIndex;
 	float InternalTimeAccumulator;
+	float TargetStrideLength;
 	bool bExtractedPoses = false;
 
 	FAnimNode_Test();
@@ -39,5 +45,6 @@ struct DROVERANIMATION_API FAnimNode_Test : public FAnimNode_Base
 	virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context) override;
 	virtual void Update_AnyThread(const FAnimationUpdateContext& Context) override;
 	virtual void Evaluate_AnyThread(FPoseContext& Output) override;
-	void ExtractAnimPose(const double InSequenceTime, FCompactPose& OutExtractedPose);
+	void ExtractPoses(FAnimationPoseData& OutData01, FAnimationPoseData& OutData02);
+	FORCEINLINE bool IsValidPoses() const { return PoseAsset && PoseIndexes.Num() > 1; }
 };
