@@ -2,15 +2,18 @@
 
 #include "AnimNode_Test.h"
 #include "Animation/AnimInstanceProxy.h"
+#include "Test_AnimInstance.h"
 
 FAnimNode_Test::FAnimNode_Test()
 {
-
+	int32 A = 0;
 }
 
 void FAnimNode_Test::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
 	BasePose.Initialize(Context);
+
+	
 
 	bValidPoses = IsValidPoses();
 
@@ -25,13 +28,17 @@ void FAnimNode_Test::Update_AnyThread(const FAnimationUpdateContext& Context)
 	BasePose.Update(Context);
 
 	if (!bValidPoses) { return; }
+
+	UTest_AnimInstance* TestAnimInstance = Cast<UTest_AnimInstance>(Context.AnimInstanceProxy->GetAnimInstanceObject());
+	
+	VelocityNormalized = TestAnimInstance->CurrentSpeed / TestAnimInstance->MaxSpeed;
 	
 	// Update internal time accumulator.
 	InternalTimeAccumulator += Context.GetDeltaTime();
-
+	
 	const float InverseVelocityNormalized = 1.0f - VelocityNormalized;
-	TargetStrideLength = FMath::Clamp(InverseVelocityNormalized * MinStrideLength, MinStrideLength, MaxStrideLength);
-	UE_LOG(LogTemp, Log, TEXT("Inverse velocity norm: %f, target stride length: %f"), InverseVelocityNormalized, TargetStrideLength);
+	TargetStrideLength = FMath::Clamp(InverseVelocityNormalized * MaxStrideLength, MinStrideLength, MaxStrideLength);
+
 	if (InternalTimeAccumulator >= TargetStrideLength)
 	{
 		InternalTimeAccumulator = 0.0f;
