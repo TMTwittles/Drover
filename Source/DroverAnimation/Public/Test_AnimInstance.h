@@ -15,6 +15,13 @@ class DROVERANIMATION_API UTest_AnimInstance : public UAnimInstance
 	GENERATED_BODY()
 
 public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (PinShownByDefault))
+	FVector ActorLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (PinShownByDefault))
+	FVector Velocity;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (PinShownByDefault))
 	float CurrentSpeed;
 

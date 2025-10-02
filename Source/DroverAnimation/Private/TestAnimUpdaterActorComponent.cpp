@@ -44,8 +44,17 @@ void UTestAnimUpdaterActorComponent::TickComponent(float DeltaTime, ELevelTick T
 
 	if (CharMovementComponent && AnimInst)
 	{
+		AnimInst->ActorLocation = CharMovementComponent->GetActorLocation();
+		AnimInst->Velocity = CharMovementComponent->Velocity;
 		AnimInst->CurrentSpeed = CharMovementComponent->Velocity.Length();
 		AnimInst->MaxSpeed = CharMovementComponent->GetMaxSpeed();
+
+		DrawDebugLine(GetWorld(),
+			GetOwner()->GetActorLocation(),
+			GetOwner()->GetActorLocation() + AnimInst->Velocity.GetSafeNormal() * ((AnimInst->CurrentSpeed / AnimInst->MaxSpeed) * 100.0f),
+			FColor::Red);
 	}
+
+	
 }
 
