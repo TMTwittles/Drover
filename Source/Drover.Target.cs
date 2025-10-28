@@ -11,6 +11,5 @@ public class DroverTarget : TargetRules
 		DefaultBuildSettings = BuildSettingsVersion.V5;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_6;
 		ExtraModuleNames.Add("Drover");
-		ExtraModuleNames.Add("DroverAnimation");
 	}
 }
