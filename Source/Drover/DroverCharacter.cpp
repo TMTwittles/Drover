@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Drover.h"
+#include "DroverPawn.h"
 
 ADroverCharacter::ADroverCharacter()
 {
