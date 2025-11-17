@@ -1,6 +1,4 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "DroverPawn.h"
 
 #include "Components/CapsuleComponent.h"
@@ -42,7 +40,7 @@ void ADroverPawn::BeginPlay()
 void ADroverPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	TickMovement(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -56,7 +54,6 @@ void ADroverPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &ADroverPawn::Look);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ADroverPawn::Look);
 	}
-
 }
 
 void ADroverPawn::Move(const FInputActionValue& Value)
@@ -67,7 +64,7 @@ void ADroverPawn::Move(const FInputActionValue& Value)
 
 void ADroverPawn::Move(const FVector2D& Value)
 {
-
+	MovementInput = Value;
 }
 
 void ADroverPawn::Look(const FInputActionValue& Value)
@@ -82,6 +79,35 @@ void ADroverPawn::Look(const FVector2D& Value)
 	{
 		AddControllerYawInput(Value.X);
 		AddControllerPitchInput(Value.Y);
+	}
+}
+
+FVector2D ADroverPawn::ConsumeMovementInput()
+{
+	const FVector2D PreMovementInput = MovementInput;
+	MovementInput = FVector2D::Zero();
+	return PreMovementInput;
+}
+
+void ADroverPawn::TickMovement(const float DeltaTime)
+{
+	const FRotator& CurrCameraRotator = CameraComp->GetComponentRotation();
+	const FRotator& YawRotation = FRotator(0.f, CurrCameraRotator.Yaw, 0.f);
+	const FVector& ForwardDir = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	const FVector& RightDir = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+	// Apply movement input
+	const FVector2D& CurrInput = ConsumeMovementInput();
+	Velocity = (ForwardDir * CurrInput.Y + RightDir * CurrInput.X) * MoveSpeed;
+	Velocity.Z -= Gravity;
+	Velocity *= DeltaTime;
+	
+	FHitResult Hit;
+	AddActorWorldOffset(Velocity, true, &Hit);
+
+	if (Hit.IsValidBlockingHit())
+	{
+		Velocity.Z = 0.f;
 	}
 }
 
