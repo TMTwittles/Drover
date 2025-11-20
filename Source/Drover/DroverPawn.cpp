@@ -102,12 +102,32 @@ void ADroverPawn::TickMovement(const float DeltaTime)
 	Velocity.Z -= Gravity;
 	Velocity *= DeltaTime;
 	
-	FHitResult Hit;
-	AddActorWorldOffset(Velocity, true, &Hit);
+	TArray<FHitResult> Hits;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
 
-	if (Hit.IsValidBlockingHit())
+	bool bHit = GetWorld()->SweepMultiByChannel(
+		Hits,
+		GetActorLocation(),
+		GetActorLocation() + Velocity,
+		FQuat::Identity,
+		ECC_Visibility,
+		FCollisionShape::MakeCapsule(CapsuleCollider->GetScaledCapsuleRadius(), CapsuleCollider->GetScaledCapsuleHalfHeight()),
+		Params
+	);
+	
+	if (bHit)
 	{
-		Velocity.Z = 0.f;
+		for (const FHitResult& Hit : Hits)
+		{
+			float Dot = FVector::DotProduct(Velocity, Hit.Normal);
+			if (Dot < 0.f)
+			{
+				Velocity -= Dot * Hit.Normal;
+			}
+		}
 	}
+
+	AddActorWorldOffset(Velocity, false);
 }
 
