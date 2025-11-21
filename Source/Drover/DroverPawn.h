@@ -12,6 +12,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
 struct FInputActionValue;
+struct FHitResult;
 
 UCLASS()
 class DROVER_API ADroverPawn : public APawn
@@ -63,6 +64,7 @@ private:
 	void Look(const FVector2D& Value);
 	FVector2D ConsumeMovementInput();
 	void TickMovement(const float DeltaTime);
-
+	inline bool PerformSweep(const FVector& Start, const FVector& End, TArray<FHitResult>& OutHits);
+	inline bool PerformSweep(const FVector& Start, const FVector& End, FHitResult& OutHit);
 	FVector2D MovementInput;
 };

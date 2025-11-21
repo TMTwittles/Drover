@@ -101,22 +101,9 @@ void ADroverPawn::TickMovement(const float DeltaTime)
 	Velocity = (ForwardDir * CurrInput.Y + RightDir * CurrInput.X) * MoveSpeed;
 	Velocity.Z -= Gravity;
 	Velocity *= DeltaTime;
-	
-	TArray<FHitResult> Hits;
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
 
-	bool bHit = GetWorld()->SweepMultiByChannel(
-		Hits,
-		GetActorLocation(),
-		GetActorLocation() + Velocity,
-		FQuat::Identity,
-		ECC_Visibility,
-		FCollisionShape::MakeCapsule(CapsuleCollider->GetScaledCapsuleRadius(), CapsuleCollider->GetScaledCapsuleHalfHeight()),
-		Params
-	);
-	
-	if (bHit)
+	TArray<FHitResult> Hits;
+	if (PerformSweep(GetActorLocation(), GetActorLocation() + Velocity, Hits))
 	{
 		for (const FHitResult& Hit : Hits)
 		{
@@ -129,5 +116,35 @@ void ADroverPawn::TickMovement(const float DeltaTime)
 	}
 
 	AddActorWorldOffset(Velocity, false);
+}
+
+inline bool ADroverPawn::PerformSweep(const FVector& StartTrace, const FVector& EndTrace, TArray<FHitResult>& OutHits)
+{
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	return GetWorld()->SweepMultiByChannel(
+		OutHits,
+		StartTrace,
+		EndTrace,
+		FQuat::Identity,
+		ECC_Visibility,
+		FCollisionShape::MakeCapsule(CapsuleCollider->GetScaledCapsuleRadius(), CapsuleCollider->GetScaledCapsuleHalfHeight()),
+		Params
+	);
+}
+
+inline bool ADroverPawn::PerformSweep(const FVector& StartTrace, const FVector& EndTrace, FHitResult& Hit)
+{
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	return GetWorld()->SweepSingleByChannel(
+		Hit,
+		StartTrace,
+		EndTrace,
+		FQuat::Identity,
+		ECC_Visibility,
+		FCollisionShape::MakeCapsule(CapsuleCollider->GetScaledCapsuleRadius(), CapsuleCollider->GetScaledCapsuleHalfHeight()),
+		Params
+	);
 }
 
