@@ -4,15 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "SlideHandler.h"
 #include "DroverPawn.generated.h"
 
+// Drover pawn
 class UCapsuleComponent;
 class USkeletalMeshComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
 struct FInputActionValue;
-struct FHitResult;
 
 UCLASS()
 class DROVER_API ADroverPawn : public APawn
@@ -64,7 +65,8 @@ private:
 	void Look(const FVector2D& Value);
 	FVector2D ConsumeMovementInput();
 	void TickMovement(const float DeltaTime);
-	inline bool PerformSweep(const FVector& Start, const FVector& End, TArray<FHitResult>& OutHits);
-	inline bool PerformSweep(const FVector& Start, const FVector& End, FHitResult& OutHit);
+	void SafeAddActorWorldOffset();
+
 	FVector2D MovementInput;
+	FSlideHandler SlideHandler;
 };

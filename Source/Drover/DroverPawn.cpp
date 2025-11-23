@@ -7,6 +7,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "InputAction.h"
 #include "EnhancedInputComponent.h"
+#include "SlideHandler.h"
 
 // Sets default values
 ADroverPawn::ADroverPawn()
@@ -27,6 +28,15 @@ ADroverPawn::ADroverPawn()
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>("CameraComp");
 	CameraComp->SetupAttachment(SpringArmComp);
+
+	// Configure slide handler collision configuration
+	{
+		SlideHandler.CollisionConfig.Channel = ECC_Visibility;
+		SlideHandler.CollisionConfig.Rotation = FQuat::Identity;
+		SlideHandler.CollisionConfig.QueryParams.AddIgnoredActor(this);
+		SlideHandler.CollisionConfig.Shape = 
+			FCollisionShape::MakeCapsule(CapsuleCollider->GetScaledCapsuleRadius(), CapsuleCollider->GetScaledCapsuleHalfHeight());
+	}
 }
 
 // Called when the game starts or when spawned
@@ -96,55 +106,26 @@ void ADroverPawn::TickMovement(const float DeltaTime)
 	const FVector& ForwardDir = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 	const FVector& RightDir = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-	// Apply movement input
+	// Apply movement input to velocity
 	const FVector2D& CurrInput = ConsumeMovementInput();
 	Velocity = (ForwardDir * CurrInput.Y + RightDir * CurrInput.X) * MoveSpeed;
 	Velocity.Z -= Gravity;
 	Velocity *= DeltaTime;
+	
+	SafeAddActorWorldOffset();
+}
 
-	TArray<FHitResult> Hits;
-	if (PerformSweep(GetActorLocation(), GetActorLocation() + Velocity, Hits))
+void ADroverPawn::SafeAddActorWorldOffset()
+{
+	// Use the slide handler to perform appropriate collision handling sliding 
+	// for character velocity.
+	SlideHandler.Position = GetActorLocation();
+	SlideHandler.RemainingSlideDelta = Velocity;
+	const int32 MaxNumSlideAttempts = 3;
+	for (int32 SlideAttemptIter = 0; 
+		SlideAttemptIter < MaxNumSlideAttempts && SlideHandler.TryStepPosition(GetWorld()); ++SlideAttemptIter)
 	{
-		for (const FHitResult& Hit : Hits)
-		{
-			float Dot = FVector::DotProduct(Velocity, Hit.Normal);
-			if (Dot < 0.f)
-			{
-				Velocity -= Dot * Hit.Normal;
-			}
-		}
 	}
-
-	AddActorWorldOffset(Velocity, false);
+	
+	SetActorLocation(SlideHandler.Position);
 }
-
-inline bool ADroverPawn::PerformSweep(const FVector& StartTrace, const FVector& EndTrace, TArray<FHitResult>& OutHits)
-{
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
-	return GetWorld()->SweepMultiByChannel(
-		OutHits,
-		StartTrace,
-		EndTrace,
-		FQuat::Identity,
-		ECC_Visibility,
-		FCollisionShape::MakeCapsule(CapsuleCollider->GetScaledCapsuleRadius(), CapsuleCollider->GetScaledCapsuleHalfHeight()),
-		Params
-	);
-}
-
-inline bool ADroverPawn::PerformSweep(const FVector& StartTrace, const FVector& EndTrace, FHitResult& Hit)
-{
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
-	return GetWorld()->SweepSingleByChannel(
-		Hit,
-		StartTrace,
-		EndTrace,
-		FQuat::Identity,
-		ECC_Visibility,
-		FCollisionShape::MakeCapsule(CapsuleCollider->GetScaledCapsuleRadius(), CapsuleCollider->GetScaledCapsuleHalfHeight()),
-		Params
-	);
-}
-
