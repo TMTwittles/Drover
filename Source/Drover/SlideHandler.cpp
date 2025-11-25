@@ -12,6 +12,22 @@ FSlideHandler::~FSlideHandler()
 	
 }
 
+bool FSlideHandler::TryStepPosition(
+	const UWorld* InWorld, const FVector& InPosition, const FVector& InRemainingSlideDelta,
+	const int32& InNumIterations, FVector& OutSteppedPosition)
+{
+	Position = InPosition;
+	RemainingSlideDelta = InRemainingSlideDelta;
+	bool bValidPositionFound = false;
+	for (int32 StepIter = 0; StepIter < InNumIterations; ++StepIter)
+	{
+		bValidPositionFound = TryStepPosition(InWorld);
+		if (!bValidPositionFound) break;
+	}
+	OutSteppedPosition = Position;
+	return bValidPositionFound;
+}
+
 bool FSlideHandler::TryStepPosition(const UWorld* InWorld)
 {
 	FHitResult Hit;

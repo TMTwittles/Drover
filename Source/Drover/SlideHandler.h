@@ -17,11 +17,6 @@ struct FCollsionShape;
 class DROVER_API FSlideHandler
 {
 public:
-	FSlideHandler();
-	~FSlideHandler();
-
-	bool TryStepPosition(const UWorld* InWorld);
-
 	struct DROVER_API FCollisionConfig
 	{
 		FCollisionShape Shape;
@@ -29,14 +24,26 @@ public:
 		FCollisionQueryParams QueryParams;
 		ECollisionChannel Channel;
 	};
-	FCollisionConfig CollisionConfig;
-	FVector Position;
-	FVector RemainingSlideDelta;
+
+	FSlideHandler();
+	~FSlideHandler();
+	
+	bool TryStepPosition(const UWorld* InWorld, 
+		const FVector& InPosition, 
+		const FVector& InRemainingSlideDelta, 
+		const int32& InNumIterations,
+		FVector& OutSteppedPosition);
+
+	FORCEINLINE void SetCollisionConfig(const FCollisionConfig& InCollisionConfig) { CollisionConfig = InCollisionConfig; }
 
 private:
+	bool TryStepPosition(const UWorld* InWorld);
 	bool InflatedAndPenetrationAdjustedSweep(const UWorld* InWorld, FHitResult& OutHitResult);
 	FCollisionShape InflateShape(const FCollisionShape& Shape, float Amount);
 	FORCEINLINE bool PerformSweepSingle(const UWorld* InWorld, const FVector& TraceStart, const FVector& TraceEnd, FHitResult& OutHitResult);
 	FORCEINLINE bool PerformSweepMulti(const UWorld* InWorld, const FVector& TraceStart, const FVector& TraceEnd, const FCollisionShape& InShape, TArray<FHitResult>& OutHitResults);
 	const float CollisionEpsilon = 0.125f;
+	FCollisionConfig CollisionConfig;
+	FVector Position;
+	FVector RemainingSlideDelta;
 };

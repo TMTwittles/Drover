@@ -31,11 +31,15 @@ ADroverPawn::ADroverPawn()
 
 	// Configure slide handler collision configuration
 	{
-		SlideHandler.CollisionConfig.Channel = ECC_Visibility;
-		SlideHandler.CollisionConfig.Rotation = FQuat::Identity;
-		SlideHandler.CollisionConfig.QueryParams.AddIgnoredActor(this);
-		SlideHandler.CollisionConfig.Shape = 
-			FCollisionShape::MakeCapsule(CapsuleCollider->GetScaledCapsuleRadius(), CapsuleCollider->GetScaledCapsuleHalfHeight());
+		FSlideHandler::FCollisionConfig DroverPawnCollisionConfig;
+		DroverPawnCollisionConfig.Channel = ECC_Visibility;
+		DroverPawnCollisionConfig.Rotation = FQuat::Identity;
+		DroverPawnCollisionConfig.QueryParams.AddIgnoredActor(this);
+		DroverPawnCollisionConfig.Shape =
+			FCollisionShape::MakeCapsule(
+				CapsuleCollider->GetScaledCapsuleRadius(), 
+				CapsuleCollider->GetScaledCapsuleHalfHeight());
+		SlideHandler.SetCollisionConfig(DroverPawnCollisionConfig);
 	}
 }
 
@@ -119,13 +123,8 @@ void ADroverPawn::SafeAddActorWorldOffset()
 {
 	// Use the slide handler to perform appropriate collision handling sliding 
 	// for character velocity.
-	SlideHandler.Position = GetActorLocation();
-	SlideHandler.RemainingSlideDelta = Velocity;
-	const int32 MaxNumSlideAttempts = 3;
-	for (int32 SlideAttemptIter = 0; 
-		SlideAttemptIter < MaxNumSlideAttempts && SlideHandler.TryStepPosition(GetWorld()); ++SlideAttemptIter)
-	{
-	}
-	
-	SetActorLocation(SlideHandler.Position);
+	FVector CollisionSlideAdjustedPosition;
+	const int32 MaxNumIterations = 5;
+	SlideHandler.TryStepPosition(GetWorld(), GetActorLocation(), Velocity, MaxNumIterations, CollisionSlideAdjustedPosition);
+	SetActorLocation(CollisionSlideAdjustedPosition);
 }
