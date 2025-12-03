@@ -28,20 +28,20 @@ class DROVER_API ADroverPawn : public APawn
 	TObjectPtr<USpringArmComponent> SpringArmComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UCameraComponent> CameraComp;
-
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> MoveAction;
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> LookAction;
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> MouseLookAction;
-
+	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> AscendAction;
+	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> DescendAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Movement", meta = (AllowPrivateAccess = "true"))
 	FVector Velocity;
 	UPROPERTY(EditAnywhere, Category="Movement", meta = (AllowPrivateAccess = "true"))
 	float MoveSpeed;
-	UPROPERTY(EditAnywhere, Category="Movement", meta = (AllowPrivateAccess = "true"))
-	float Gravity;
 
 public:
 	// Sets default values for this pawn's properties
@@ -63,6 +63,8 @@ private:
 	void Move(const FVector2D& Value);
 	void Look(const FInputActionValue& Value);
 	void Look(const FVector2D& Value);
+	void Descend();
+	void Ascend();
 	FVector2D ConsumeMovementInput();
 	void TickMovement(const float DeltaTime);
 	void SafeAddActorWorldOffset();

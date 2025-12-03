@@ -67,6 +67,8 @@ void ADroverPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADroverPawn::Move);
 		EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &ADroverPawn::Look);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ADroverPawn::Look);
+		EnhancedInputComponent->BindAction(DescendAction, ETriggerEvent::Triggered, this, &ADroverPawn::Descend);
+		EnhancedInputComponent->BindAction(AscendAction, ETriggerEvent::Triggered, this, &ADroverPawn::Ascend);
 	}
 }
 
@@ -96,6 +98,16 @@ void ADroverPawn::Look(const FVector2D& Value)
 	}
 }
 
+void ADroverPawn::Descend()
+{
+	Velocity.Z -= MoveSpeed;
+}
+
+void ADroverPawn::Ascend()
+{
+	Velocity.Z += MoveSpeed;
+}
+
 FVector2D ADroverPawn::ConsumeMovementInput()
 {
 	const FVector2D PreMovementInput = MovementInput;
@@ -112,8 +124,7 @@ void ADroverPawn::TickMovement(const float DeltaTime)
 
 	// Apply movement input to velocity
 	const FVector2D& CurrInput = ConsumeMovementInput();
-	Velocity = (ForwardDir * CurrInput.Y + RightDir * CurrInput.X) * MoveSpeed;
-	Velocity.Z -= Gravity;
+	Velocity = ((ForwardDir * CurrInput.Y + RightDir * CurrInput.X) * MoveSpeed) + FVector(0.0f, 0.0f, Velocity.Z);
 	Velocity *= DeltaTime;
 	
 	SafeAddActorWorldOffset();
