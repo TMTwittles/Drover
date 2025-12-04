@@ -42,6 +42,8 @@ class DROVER_API ADroverPawn : public APawn
 	FVector Velocity;
 	UPROPERTY(EditAnywhere, Category="Movement", meta = (AllowPrivateAccess = "true"))
 	float MoveSpeed;
+	UPROPERTY(EditAnywhere, Category="Movement", meta = (AllowPrivateAccess = "true"))
+	float RotationSpeed;
 
 public:
 	// Sets default values for this pawn's properties
@@ -65,8 +67,8 @@ private:
 	void Look(const FVector2D& Value);
 	void Descend();
 	void Ascend();
+	void RotateToVelocity(const float InDeltaTime);
 	FVector2D ConsumeMovementInput();
-	void TickMovement(const float DeltaTime);
 	void SafeAddActorWorldOffset();
 
 	FVector2D MovementInput;

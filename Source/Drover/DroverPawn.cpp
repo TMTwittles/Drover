@@ -47,14 +47,29 @@ ADroverPawn::ADroverPawn()
 void ADroverPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
 void ADroverPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	TickMovement(DeltaTime);
+	
+	const FRotator& CurrCameraRotator = CameraComp->GetComponentRotation();
+	const FRotator& YawRotation = FRotator(0.f, CurrCameraRotator.Yaw, 0.f);
+	const FVector& ForwardDir = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	const FVector& RightDir = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+	// Apply movement input to velocity
+	const FVector2D& CurrInput = ConsumeMovementInput();
+	Velocity = ((ForwardDir * CurrInput.Y + RightDir * CurrInput.X) * MoveSpeed) + FVector(0.0f, 0.0f, Velocity.Z);
+
+	// Only do calculations if velocity is greater than zero.
+	if (!Velocity.IsNearlyZero(UE_SMALL_NUMBER))
+	{
+		Velocity *= DeltaTime;
+		RotateToVelocity(DeltaTime);
+		SafeAddActorWorldOffset();
+	}
 }
 
 // Called to bind functionality to input
@@ -108,26 +123,25 @@ void ADroverPawn::Ascend()
 	Velocity.Z += MoveSpeed;
 }
 
+void ADroverPawn::RotateToVelocity(const float InDeltaTime)
+{
+	const FRotator& CurrentRotation = GetActorRotation();
+	const FVector& VelocityHorizontal = FVector(Velocity.X, Velocity.Y, 0.0f);
+	const FRotator& TargetRotation = FRotationMatrix::MakeFromX(VelocityHorizontal.GetSafeNormal()).Rotator();
+	const FRotator& SlerpedRotation = FMath::RInterpTo(
+		CurrentRotation,
+		TargetRotation,
+		InDeltaTime,
+		RotationSpeed
+	);
+	SetActorRotation(SlerpedRotation);
+}
+
 FVector2D ADroverPawn::ConsumeMovementInput()
 {
 	const FVector2D PreMovementInput = MovementInput;
 	MovementInput = FVector2D::Zero();
 	return PreMovementInput;
-}
-
-void ADroverPawn::TickMovement(const float DeltaTime)
-{
-	const FRotator& CurrCameraRotator = CameraComp->GetComponentRotation();
-	const FRotator& YawRotation = FRotator(0.f, CurrCameraRotator.Yaw, 0.f);
-	const FVector& ForwardDir = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	const FVector& RightDir = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-	// Apply movement input to velocity
-	const FVector2D& CurrInput = ConsumeMovementInput();
-	Velocity = ((ForwardDir * CurrInput.Y + RightDir * CurrInput.X) * MoveSpeed) + FVector(0.0f, 0.0f, Velocity.Z);
-	Velocity *= DeltaTime;
-	
-	SafeAddActorWorldOffset();
 }
 
 void ADroverPawn::SafeAddActorWorldOffset()
